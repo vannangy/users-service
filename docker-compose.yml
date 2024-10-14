@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:${POSTGRES_SERVER_VERSION}
+    container_name: docker-compose-spring-boot-postgres
+    restart: unless-stopped
+    env_file: ./.env
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - default
+  app:
+    build: ./app  
+    restart: on-failure
+    env_file: ./.env
+    ports:
+       - ${APP_EXPOSE_PORT}:${APP_SERVER_PORT}
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: ${APP_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${APP_DATASOURCE_USER}
+      SPRING_DATASOURCE_PASSWORD: ${APP_DATASOURCE_PASS}
+    networks:
+      - default
+
+networks:
+  default:
+
+volumes:
+  pgdata:
